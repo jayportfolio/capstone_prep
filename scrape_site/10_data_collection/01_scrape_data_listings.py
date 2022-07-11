@@ -17,6 +17,7 @@ import html2text
 # PAGES_PER_BOROUGH = 3
 # PAGES_PER_BOROUGH = 7
 PAGES_PER_BOROUGH = 12
+#PAGES_PER_BOROUGH = 3
 
 DEBUG_ON = True
 
@@ -25,17 +26,22 @@ SCRAPED_LISTINGS = -1
 SCRAPED_ITEMS = -1
 global_min_price = "100000"
 multiplier = 0.5
+#multiplier = 1
 # multiplier = 2
 
 NOTHING_YIELDED = True
 
 header_on_meta, header_on_json, first_call = True, True, True
-MAX_ITEMS = vv.MAX_LISTINGS * 25 + 100
 DO_PICKUPS = False  # True
 ONLY_PICKUPS = False
 DO_LISTINGS = True
 DO_ITEMS = True
 PICKUP_FROM_TAIL = False
+
+if DO_PICKUPS:
+    MAX_ITEMS = vv.MAX_LISTINGS * 25 + 100
+else:
+    MAX_ITEMS = vv.MAX_LISTINGS * 25 + 20
 
 borough_retrieved_no_data = {}
 
@@ -43,8 +49,8 @@ print_headers = True
 
 
 # Create the Spider class
-class Rightmove_Splash_Spider(scrapy.Spider):
-    name = "rightmove_splasher"
+class Splasher_spider(scrapy.Spider):
+    name = "splasher_spider"
 
     # start_requests method
     def start_requests(self):
@@ -103,6 +109,13 @@ class Rightmove_Splash_Spider(scrapy.Spider):
                     print('already reached end of pagination for', borough_name)
                     continue
 
+                if SCRAPED_LISTINGS > vv.MAX_LISTINGS:
+                    print(f"00 exceeded max scrape: ({SCRAPED_LISTINGS} > {vv.MAX_LISTINGS})")
+                    return
+                if SCRAPED_ITEMS > MAX_ITEMS:
+                    print(f"00 B exceeded max scrape: ({SCRAPED_ITEMS} > {MAX_ITEMS})")
+                    return
+
                 try:
                     q_minPrice_unrounded = df_audit.get(borough_name).get("min_price")
                     q_minPrice_unrounded = self.price_to_int(q_minPrice_unrounded)
@@ -129,6 +142,15 @@ class Rightmove_Splash_Spider(scrapy.Spider):
                     if borough_retrieved_no_data[borough_name] > 2:
                         print(f"retrieved too many no_datas for {borough_name}, cutting out early")
                         continue
+
+                    if q_minPrice_unrounded > vv.MAX_PRICE:
+                        print(f"recorded price {q_minPrice_unrounded} exceeds max price {vv.MAX_PRICE}, cutting out early")
+                        continue
+
+                    if SCRAPED_LISTINGS > vv.MAX_LISTINGS:
+                        print(f"0 exceeded max scrape: ({SCRAPED_LISTINGS} > {vv.MAX_LISTINGS})")
+                        return
+
 
                     index = 24 * page_number
 
@@ -163,8 +185,7 @@ class Rightmove_Splash_Spider(scrapy.Spider):
                         callback=self.parse_front,
                         # cb_kwargs=dict(main_url=response.url),
                         cb_kwargs=dict(main_url=listings_url),
-                        headers={
-                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.122 Safari/537.36'},
+                        headers=vv.get_scraper_headers(),
 
                         args={
                             # optional; parameters passed to Splash HTTP API
@@ -196,10 +217,10 @@ class Rightmove_Splash_Spider(scrapy.Spider):
                     print(f"You have scraped page {page_number + 1} from apartment listings.")
                     print("\n")
 
-                    # code to make them think we are human
-                    self.sleep_long_or_short(long_sleep_chance=100,
-                                             short_lowbound=0, short_highbound=2,
-                                             long_lowbound=10, long_highbound=20, source=label + "3")
+                    # # code to make them think we are human
+                    # self.sleep_long_or_short(long_sleep_chance=100,
+                    #                          short_lowbound=0, short_highbound=2,
+                    #                          long_lowbound=10, long_highbound=20, source=label + "3")
                     index = index + 24
 
                 print(f'finished scraping (for loop was set to {PAGES_PER_BOROUGH}')
@@ -408,8 +429,11 @@ class Rightmove_Splash_Spider(scrapy.Spider):
 
             # won't work, that's from the javascript version
             # add_info = apartment.css('div.propertyCard-branchSummary::text').extract_first().strip()
-            add_info = add_date + add_agent
-            add_info_list.append(add_info)
+            try:
+                add_info = add_date + add_agent
+                add_info_list.append(add_info)
+            except:
+                add_info_list.append("error")
 
             special_attributes = response.css(pp.special_attribute).extract()
             if len(special_attributes) > 0:
@@ -432,16 +456,16 @@ class Rightmove_Splash_Spider(scrapy.Spider):
                     df_indiv_saved2["version"]
                     df_indiv_saved2 = df_indiv_saved2[~df_indiv_saved2.index.duplicated(keep='last')]
                     if code not in df_indiv_saved2.index:
-                        debug_print(f"Don't have enriching for this id yet: {code} (page {page_number + 1}), {borough_name}")
+                        debug_print(f"Don't have enriching for this id yet: {code} (page {page_number + 1}), {borough_name} {valid_price}")
                         yield from self.splash_pages(indiv_apartment_link, response)
                     elif (not vv.VERSION_ACCEPTABLE.__contains__(df_indiv_saved2.loc[code]["version"])):
-                        debug_print(f"Enriching version is too old for this id: {code} (page {page_number + 1}), {borough_name}")
+                        debug_print(f"Enriching version is too old for this id: {code} (page {page_number + 1}), {borough_name} {valid_price}")
                         yield from self.splash_pages(indiv_apartment_link, response)
                     else:
-                        debug_print(f"already have this id: {code} (page {page_number + 1}), {borough_name}")
+                        debug_print(f"already have this id: {code} (page {page_number + 1}), {borough_name} {valid_price}")
                 except:
                     print(
-                        f"enriched df doesn't exist, or don't have individual listings yet for:{code} (page {page_number + 1}), {borough_name}")
+                        f"enriched df doesn't exist, or don't have individual listings yet for:{code} (page {page_number + 1}),{borough_name} {valid_price}")
                     yield from self.splash_pages(indiv_apartment_link, response)
 
         data = {
@@ -529,28 +553,32 @@ class Rightmove_Splash_Spider(scrapy.Spider):
         print(f"SCRAPED LISTINGS: {SCRAPED_LISTINGS} (SCRAPED ITEMS: {SCRAPED_ITEMS}) <-- {response.url}")
 
         if SCRAPED_LISTINGS > vv.MAX_LISTINGS:
-            print(f"3 exceeded max listings scrape: ({SCRAPED_LISTINGS} > {vv.MAX_LISTINGS})")
+            print(f"7 exceeded max listings scrape: ({SCRAPED_LISTINGS} > {vv.MAX_LISTINGS})")
             return
+        if SCRAPED_ITEMS > MAX_ITEMS:
+            print(f"7 B exceeded max scrape: ({SCRAPED_ITEMS} > {MAX_ITEMS})")
+            return
+
 
         if DO_ITEMS:
             for code in all_codes:
                 if SCRAPED_LISTINGS > vv.MAX_LISTINGS:
-                    print(f"5 exceeded max listings scrape: ({SCRAPED_LISTINGS} > {vv.MAX_LISTINGS}) {borough_name}")
+                    print(f"8 exceeded max listings scrape: ({SCRAPED_LISTINGS} > {vv.MAX_LISTINGS}) {borough_name}")
                     return
                 try:
                     df_indiv_saved2["version"]
                     df_indiv_saved2 = df_indiv_saved2[~df_indiv_saved2.index.duplicated(keep='last')]
                     if code not in df_indiv_saved2.index:
-                        debug_print(f"Don't have enriching for this id yet: {code} (page {page_number + 1}), {borough_name}")
+                        debug_print(f"Don't have enriching for this id yet: {code} (page {page_number + 1}),{borough_name} {valid_price}")
                         yield from self.splash_pages(indiv_apartment_link, response)
                     elif (not vv.VERSION_ACCEPTABLE.__contains__(df_indiv_saved2.loc[code]["version"])):
-                        debug_print(f"Enriching version is too old for this id: {code} (page {page_number + 1}), {borough_name}")
+                        debug_print(f"Enriching version is too old for this id: {code} (page {page_number + 1}),{borough_name} {valid_price}")
                         yield from self.splash_pages(indiv_apartment_link, response)
                     else:
-                        debug_print(f"already have this id: {code} (page {page_number + 1}), {borough_name}")
+                        debug_print(f"already have this id: {code} (page {page_number + 1}), {borough_name} {valid_price}")
                 except:
                     print(
-                        f"enriched df doesn't exist, or don't have individual listings yet for:{code} (page {page_number + 1}), {borough_name}")
+                        f"enriched df doesn't exist, or don't have individual listings yet for:{code} (page {page_number + 1}),{borough_name} {valid_price}")
                     yield from self.splash_pages(indiv_apartment_link, response)
 
     def write_json_pretty(self, convert_file, df_audit):
@@ -607,7 +635,7 @@ class Rightmove_Splash_Spider(scrapy.Spider):
                 pass
 
         if SCRAPED_ITEMS > MAX_ITEMS:
-            print(f"7 exceeded max scrape: ({SCRAPED_ITEMS} > {MAX_ITEMS})")
+            print(f"9 exceeded max scrape: ({SCRAPED_ITEMS} > {MAX_ITEMS})")
             return
 
         self.process_page(response)
@@ -890,13 +918,14 @@ class Rightmove_Splash_Spider(scrapy.Spider):
                 try:
                     df_property_app.to_csv(vv.LISTING_JSON_MODEL_TRIAL, mode='a', encoding="utf-8", index=True, header=False)
                     pd.read_csv(vv.LISTING_JSON_MODEL_TRIAL)
-                    df_property_app.to_csv(vv.LISTING_JSON_MODEL_FILE, mode='a', encoding="utf-8", index=True, header=False)
+                    df_property_app.to_csv(vv.LISTING_JSON_MODEL_FILE, mode='a', encoding="utf-8", index=True, header=header_on_json)
                 except:
                     df_property_app.to_csv(vv.LISTING_JSON_MODEL_FAILED, mode='a', encoding="utf-8", index=True, header=False)
 
             # df_original['bedrooms'] = df_original['Address'].str.extract('(bedroom)')
             # check if the csv file has been corrupted by <br> or other
             try:
+
                 test = pd.read_csv(vv.LISTING_JSON_MODEL_FILE)
                 test['id'].astype('int')
                 header_on_json = False
@@ -989,7 +1018,7 @@ dc_dict = dict()
 
 # Run the Spider
 process = CrawlerProcess()
-x = process.crawl(Rightmove_Splash_Spider)
+x = process.crawl(Splasher_spider)
 y = process.start()
 stations = []
 all_codes2 = []

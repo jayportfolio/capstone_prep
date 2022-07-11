@@ -8,15 +8,10 @@ from scrapy.crawler import CrawlerProcess  # Import the CrawlerProcess: for runn
 import scrapy_splash
 from scrapy_splash import SplashRequest
 
+sys.path.append('../../globalfunction')  # setting path
 import globalfunction.vv as vv  # importing
 import globalfunction.pp as pp  # importing
 
-import datetime
-
-import datetime
-import pandas as pd
-import csv
-import pandas as pd
 import html2text
 
 # PAGES_PER_BOROUGH = 3
@@ -31,16 +26,17 @@ SCRAPED_ITEMS = -1
 global_min_price = "100000"
 multiplier = 0.5
 # multiplier = 2
+acceptable = vv.VERSION_ACCEPTABLE
 
 NOTHING_YIELDED = True
 
 header_on_meta, header_on_json, first_call = True, True, True
-MAX_ITEMS = 600
+MAX_ITEMS = 200
 DO_PICKUPS = True
 ONLY_PICKUPS = True
 DO_LISTINGS = False
 DO_ITEMS = False
-PICKUP_FROM_TAIL = True
+PICKUP_FROM_TAIL = False#True
 
 borough_retrieved_no_data = {}
 
@@ -48,8 +44,8 @@ print_headers = True
 
 
 # Create the Spider class
-class Rightmove_Splash_Spider(scrapy.Spider):
-    name = "rightmove_splasher"
+class Splasher_spider(scrapy.Spider):
+    name = "splasher_spider"
 
     # start_requests method
     def start_requests(self):
@@ -219,7 +215,6 @@ class Rightmove_Splash_Spider(scrapy.Spider):
     def pickup_enriching_gaps(self, missable_filename=vv.LISTING_ENRICHED_FILE):
         if print_headers: print("PICKUP_ENRICHING_GAPS")
         global SCRAPED_ITEMS
-        import pandas as pd
         if type(missable_filename) == list:
             df_potentially_missing = pd.read_csv(missable_filename[0])
             for i in range(1, len(missable_filename)):
@@ -327,7 +322,6 @@ class Rightmove_Splash_Spider(scrapy.Spider):
             with open(vv.AUDIT_FILE) as f:
                 raw_audit = f.read()
             df_audit = json.loads(raw_audit)
-            import datetime
             date_scraped5 = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             try:
                 df_audit[borough_name]["maxxed"] = "MAXXED"
@@ -415,8 +409,11 @@ class Rightmove_Splash_Spider(scrapy.Spider):
 
             # won't work, that's from the javascript version
             # add_info = apartment.css('div.propertyCard-branchSummary::text').extract_first().strip()
-            add_info = add_date + add_agent
-            add_info_list.append(add_info)
+            try:
+                add_info = add_date + add_agent
+                add_info_list.append(add_info)
+            except:
+                add_info_list.append("error")
 
             special_attributes = response.css(pp.special_attribute).extract()
             if len(special_attributes) > 0:
@@ -424,7 +421,6 @@ class Rightmove_Splash_Spider(scrapy.Spider):
                 short_description.extend(special_attributes)
 
             # get current date and time
-            import datetime
             date_scraped = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             date_scraped_list0.append(date_scraped)
 
@@ -442,7 +438,7 @@ class Rightmove_Splash_Spider(scrapy.Spider):
                     if code not in df_indiv_saved2.index:
                         debug_print(f"Don't have enriching for this id yet: {code} (page {page_number + 1}), {borough_name}")
                         yield from self.splash_pages(indiv_apartment_link, response)
-                    elif (not vv.VERSION_ACCEPTABLE.__contains__(df_indiv_saved2.loc[code]["version"])):
+                    elif (not acceptable.__contains__(df_indiv_saved2.loc[code]["version"])):
                         debug_print(f"Enriching version is too old for this id: {code} (page {page_number + 1}), {borough_name}")
                         yield from self.splash_pages(indiv_apartment_link, response)
                     else:
@@ -551,7 +547,7 @@ class Rightmove_Splash_Spider(scrapy.Spider):
                     if code not in df_indiv_saved2.index:
                         debug_print(f"Don't have enriching for this id yet: {code} (page {page_number + 1}), {borough_name}")
                         yield from self.splash_pages(indiv_apartment_link, response)
-                    elif (not vv.VERSION_ACCEPTABLE.__contains__(df_indiv_saved2.loc[code]["version"])):
+                    elif (not acceptable.__contains__(df_indiv_saved2.loc[code]["version"])):
                         debug_print(f"Enriching version is too old for this id: {code} (page {page_number + 1}), {borough_name}")
                         yield from self.splash_pages(indiv_apartment_link, response)
                     else:
@@ -711,7 +707,7 @@ class Rightmove_Splash_Spider(scrapy.Spider):
 
         stations_panel = response.css(pp.css_stations)
         if False:
-            station_distances = stations_panel.css('span::text').extract()
+            station_distances = stations_panel.css(pp.css_station_text).extract()
             shortest_distance = 99999999
             for each_distance in station_distances:
                 if "miles" in each_distance:
@@ -808,12 +804,10 @@ class Rightmove_Splash_Spider(scrapy.Spider):
             self.write_to_csv__full(df, vv.LISTING_ENRICHED_FILE, [], vv.LISTING_ENRICHED_PUBLICATION)
         else:
 
-            import pandas as pd
             df_saved = pd.read_csv(vv.LISTING_ENRICHED_FILE)
             df_saved['ids'] = df_saved['ids'].astype('str')
             df_saved.set_index("ids", inplace=True)
 
-            import csv
             # with open('eggs.csv', 'a', newline='') as csvfile:
             with open(vv.LISTING_ENRICHED_FILE, 'a', newline='') as csvfile:
                 if not all_codes2[0] in df_saved.index:
@@ -856,7 +850,7 @@ class Rightmove_Splash_Spider(scrapy.Spider):
                 # print("first_level:", first_level)
                 if model_property[first_level] and type(model_property[first_level]) not in (bool, int):
                     delete = [key for key in model_property[first_level] if
-                              ((type(key) == str) and (unneeded_model_1 in key.lower()))]
+                              ((type(key) == str) and (pp.unneeded_model_1 in key.lower()))]
                 else:
                     # print("Level 1:", model_property[first_level], "is not a dictionary (or an empty dictionary)")
                     pass
@@ -869,7 +863,6 @@ class Rightmove_Splash_Spider(scrapy.Spider):
                     else:
                         print("something odd here")
 
-            import pandas as pd
             model_property["version"] = vv.VERSION_LATEST
             model_property["date_scraped"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             # print(model_property)
@@ -881,7 +874,6 @@ class Rightmove_Splash_Spider(scrapy.Spider):
                     df_property_app[pp.dirty_text_1].str.find('\n')[0] > -1:
                 df_property_app[pp.dirty_text_1] = df_property_app[pp.dirty_text_1].str.replace('<br />',
                                                                                                 ';;;')
-                import html2text
                 converter = html2text.HTML2Text()
                 converter.ignore_links = True
                 handled = converter.handle(df_property_app[pp.dirty_text_1][0])
@@ -902,7 +894,7 @@ class Rightmove_Splash_Spider(scrapy.Spider):
                 try:
                     df_property_app.to_csv(vv.LISTING_JSON_MODEL_TRIAL, mode='a', encoding="utf-8", index=True, header=False)
                     pd.read_csv(vv.LISTING_JSON_MODEL_TRIAL)
-                    df_property_app.to_csv(vv.LISTING_JSON_MODEL_FILE, mode='a', encoding="utf-8", index=True, header=False)
+                    df_property_app.to_csv(vv.LISTING_JSON_MODEL_FILE, mode='a', encoding="utf-8", index=True, header=header_on_json)
                 except:
                     df_property_app.to_csv(vv.LISTING_JSON_MODEL_FAILED, mode='a', encoding="utf-8", index=True, header=False)
 
@@ -991,12 +983,6 @@ class Rightmove_Splash_Spider(scrapy.Spider):
             return sleep_time
 
 
-def to_date(series):
-    hashy = hash(str(series))
-    # return hashy% 100000000
-    return hashy
-
-
 def debug_print(string):
     if DEBUG_ON:
         print(string)
@@ -1007,7 +993,7 @@ dc_dict = dict()
 
 # Run the Spider
 process = CrawlerProcess()
-x = process.crawl(Rightmove_Splash_Spider)
+x = process.crawl(Splasher_spider)
 y = process.start()
 stations = []
 all_codes2 = []

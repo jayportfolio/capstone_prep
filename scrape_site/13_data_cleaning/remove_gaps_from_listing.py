@@ -1,11 +1,12 @@
 # open file
-import csv
+import csv, sys
 from _csv import reader
+sys.path.append('../../globalfunction')  # setting path
 import globalfunction.vv as vv  # importing
 
 
 def clean_file(in_file="testlist.txt", out_file=None):
-    removable_ids = ['11111111', '222222222']
+    removable_ids = ['110143739', '124179563','124178711']
 
     if in_file and not out_file:
         out_file = in_file.replace(".csv", "_out.csv").replace(".txt", "_out.txt")

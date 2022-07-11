@@ -49,8 +49,13 @@ MODEL = "window.PAGE_MODEL"
 MODEL2 = "window.jsonModel"
 
 # numeric_values_only=True ==> False
+def dataset_modelling_version(iteration_code, separate_Xy=False, numeric_values_only=False, nans_forbidden=True, exceptional_nans=[], no_cuts=False,
+               early_duplicates=True, remove_duplicates=False, HOW='left', publish=False, privacy=True, remove_outliers=False):
+
+    pass
+
 def quick_data(separate_Xy=False, numeric_values_only=False, nans_forbidden=True, exceptional_nans=[], no_cuts=False,
-               early_duplicates=True, remove_duplicates=False, HOW='left', publish=False, privacy=True):
+               early_duplicates=True, remove_duplicates=False, HOW='left', publish=False, privacy=True, remove_outliers=False):
     df_list = pd.read_csv(vv.LISTING_BASIC_FILE)
     df_indiv = pd.read_csv(vv.LISTING_ENRICHED_FILE)
     df_meta = pd.read_csv(vv.LISTING_JSON_META_FILE)
@@ -124,6 +129,35 @@ def quick_data(separate_Xy=False, numeric_values_only=False, nans_forbidden=True
 
     print(f'dataframe length: {len(df_original)}')
     # function to be applied
+
+
+    # Drop: data protection
+    if privacy:
+        df_original = df_original.drop(['Address'], axis=1)
+
+        if HOW != 'listings_only':
+            df_original = df_original.drop(['analyticsBranch.displayAddress', 'analyticsProperty.postcode', 'analyticsProperty.customUri','propertyUrls.similarPropertiesUrl','propertyUrls.nearbySoldPropertiesUrl'], axis=1)
+
+    if publish:
+        df_original = df_original.drop(['version', 'Links','date_scraped', 'referencing_link'], axis=1)
+
+        #df_original['borough_name'] = df_original["borough"].str.extract("([a-zA-Z]+)")
+        df_original['borough_name'] = df_original["borough"].str.extract("\('(.+)',")
+        df_original = df_original.drop(['borough'], axis=1)
+
+        if HOW != 'listings_only':
+            df_original = df_original.drop(['link'], axis=1)
+            df_original = df_original.drop(
+                ['version_listing', 'version_model', 'version_meta', 'date_scraped_model'], axis=1)
+
+            df_original = df_original.drop(['broadband.broadbandCheckerUrl'], axis=1)
+
+    # df_original = df_original.rename(index=str, columns={"Station_Prox": "distance to train", 'bedrooms_model': 'bedrooms_2', 'bathrooms_model': 'bathrooms_2'})
+    df_original = df_original.rename(index=str, columns={"Station_Prox": "distance_to_any_train"})
+
+    if HOW == 'listings_only':
+        return df_original
+
     def get_array_length(array_string):
         try:
             array = array_string[1:-1].split(",")  # a list of strings
@@ -133,24 +167,18 @@ def quick_data(separate_Xy=False, numeric_values_only=False, nans_forbidden=True
             pass
 
     df_original['floorplan_count'] = df_original['floorplans'].apply(get_array_length)
+    df_original = df_original.drop(['floorplans'], axis=1)
 
-    # Drop: data protection
-    if privacy:
-        df_original = df_original.drop(['Address', 'analyticsBranch.displayAddress', 'analyticsProperty.postcode', 'analyticsProperty.customUri','propertyUrls.similarPropertiesUrl','propertyUrls.nearbySoldPropertiesUrl'], axis=1)
-
-    if publish:
-        df_original = df_original.drop(['Links', 'link', 'referencing_link'], axis=1)
-        df_original = df_original.drop(
-            ['version', 'version_listing', 'version_model', 'version_meta', 'date_scraped_model'], axis=1)
-
-        df_original['borough_name'] = df_original["borough"].str.extract("([a-zA-Z]+)")
-        df_original = df_original.drop(['borough'], axis=1)
-
-        df_original = df_original.drop(['floorplans'], axis=1)
-        df_original = df_original.drop(['broadband.broadbandCheckerUrl'], axis=1)
-
-    # df_original = df_original.rename(index=str, columns={"Station_Prox": "distance to train", 'bedrooms_model': 'bedrooms_2', 'bathrooms_model': 'bathrooms_2'})
-    df_original = df_original.rename(index=str, columns={"Station_Prox": "distance_to_any_train"})
+    if remove_outliers:
+        print(len(df_original))
+        df_original = df_original[df_original["Price"] <= 600000]
+        print(len(df_original))
+        df_original = df_original[df_original["distance_to_any_train"] < 8]
+        print(len(df_original))
+        df_original = df_original[df_original["bathrooms"] < 8]
+        print(len(df_original))
+        df_original = df_original[df_original["floorplan_count"] < 18]
+        print(len(df_original))
 
     if no_cuts:
         return df_original
@@ -218,3 +246,6 @@ def quick_data(separate_Xy=False, numeric_values_only=False, nans_forbidden=True
         return df_original
 
 #quick_data(numeric_values_only=True)
+#quick_data(remove_duplicates=True,numeric_values_only=False,HOW='listings_only')
+#print(quick_data(remove_duplicates=True,numeric_values_only=False,HOW='listings_only',publish=True))
+quick_data(remove_duplicates=True, publish=True,remove_outliers=True)
