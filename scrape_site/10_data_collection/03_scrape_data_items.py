@@ -14,6 +14,8 @@ import globalfunction.pp as pp  # importing
 
 import html2text
 
+target_concurrency = 7
+
 # PAGES_PER_BOROUGH = 3
 # PAGES_PER_BOROUGH = 7
 PAGES_PER_BOROUGH = 12
@@ -26,37 +28,59 @@ SCRAPED_ITEMS = -1
 global_min_price = "100000"
 multiplier = 0.5
 # multiplier = 2
+multiplier = 0.1
+multiplier = 0
+
 acceptable = vv.VERSION_ACCEPTABLE
 
 NOTHING_YIELDED = True
 
 header_on_meta, header_on_json, first_call = True, True, True
-MAX_ITEMS = 200
 DO_PICKUPS = True
 ONLY_PICKUPS = True
 DO_LISTINGS = False
 DO_ITEMS = False
-PICKUP_FROM_TAIL = False#True
+PICKUP_FROM_TAIL = False  # True
+
+if DO_PICKUPS:
+    MAX_ITEMS = vv.MAX_LISTINGS * 25 + 100
+else:
+    MAX_ITEMS = vv.MAX_LISTINGS * 25 + 20
 
 borough_retrieved_no_data = {}
 
 print_headers = True
 
 
+class QuoteItem(scrapy.Item):
+    text = scrapy.Field()
+    author = scrapy.Field()
+    tags = scrapy.Field()
+
+
 # Create the Spider class
 class Splasher_spider(scrapy.Spider):
     name = "splasher_spider"
+
+
+    custom_settings = {
+        #'SOME_SETTING': 'some value',
+        #'AUTOTHROTTLE_TARGET_CONCURRENCY': 1.5
+        'AUTOTHROTTLE_TARGET_CONCURRENCY': target_concurrency
+    }
+
+    print('default settings updated')
 
     # start_requests method
     def start_requests(self):
 
         global borough_retrieved_no_data, header_on_meta, header_on_json, SCRAPED_LISTINGS
 
-        print(pd.DataFrame({k: sys.getsizeof(v) for (k, v) in locals().items()}, index=['Size']).T.sort_values(by='Size', ascending=False).head(4))
-        print(gc.get_threshold())
-        print(gc.get_count())
+        #print(pd.DataFrame({k: sys.getsizeof(v) for (k, v) in locals().items()}, index=['Size']).T.sort_values(by='Size', ascending=False).head(4))
+        #print(gc.get_threshold())
+        #print(gc.get_count())
         gc.collect()
-        print(gc.get_count())
+        #print(gc.get_count())
 
         try:
             pd.read_csv(vv.LISTING_JSON_MODEL_FILE)
@@ -104,6 +128,13 @@ class Splasher_spider(scrapy.Spider):
                     print('already reached end of pagination for', borough_name)
                     continue
 
+                if SCRAPED_LISTINGS > vv.MAX_LISTINGS:
+                    print(f"00 exceeded max scrape: ({SCRAPED_LISTINGS} > {vv.MAX_LISTINGS})")
+                    return
+                if SCRAPED_ITEMS > MAX_ITEMS:
+                    print(f"00 B exceeded max scrape: ({SCRAPED_ITEMS} > {MAX_ITEMS})")
+                    return
+
                 try:
                     q_minPrice_unrounded = df_audit.get(borough_name).get("min_price")
                     q_minPrice_unrounded = self.price_to_int(q_minPrice_unrounded)
@@ -130,6 +161,15 @@ class Splasher_spider(scrapy.Spider):
                     if borough_retrieved_no_data[borough_name] > 2:
                         print(f"retrieved too many no_datas for {borough_name}, cutting out early")
                         continue
+
+                    if q_minPrice_unrounded > vv.MAX_PRICE:
+                        print(f"recorded price {q_minPrice_unrounded} exceeds max price {vv.MAX_PRICE}, cutting out early")
+                        continue
+
+                    if SCRAPED_LISTINGS > vv.MAX_LISTINGS:
+                        print(f"0 exceeded max scrape: ({SCRAPED_LISTINGS} > {vv.MAX_LISTINGS})")
+                        return
+
 
                     index = 24 * page_number
 
@@ -164,8 +204,7 @@ class Splasher_spider(scrapy.Spider):
                         callback=self.parse_front,
                         # cb_kwargs=dict(main_url=response.url),
                         cb_kwargs=dict(main_url=listings_url),
-                        headers={
-                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.122 Safari/537.36'},
+                        headers=vv.get_scraper_headers(),
 
                         args={
                             # optional; parameters passed to Splash HTTP API
@@ -197,10 +236,10 @@ class Splasher_spider(scrapy.Spider):
                     print(f"You have scraped page {page_number + 1} from apartment listings.")
                     print("\n")
 
-                    # code to make them think we are human
-                    self.sleep_long_or_short(long_sleep_chance=100,
-                                             short_lowbound=0, short_highbound=2,
-                                             long_lowbound=10, long_highbound=20, source=label + "3")
+                    # # code to make them think we are human
+                    # self.sleep_long_or_short(long_sleep_chance=100,
+                    #                          short_lowbound=0, short_highbound=2,
+                    #                          long_lowbound=10, long_highbound=20, source=label + "3")
                     index = index + 24
 
                 print(f'finished scraping (for loop was set to {PAGES_PER_BOROUGH}')
@@ -353,8 +392,16 @@ class Splasher_spider(scrapy.Spider):
 
         apartments = response.css(pp.css_apartments)
 
+        #for quote in response.css('div.quote'):
         for apartment in apartments:
             # course_links = course_blocks.xpath('./a/@href')
+
+            item = QuoteItem()
+            # item['text'] = quote.css('span.text::text').extract_first()
+            # item['author'] = quote.css('small.author::text').extract_first()
+            # item['tags'] = quote.css('div.tags a.tag::text').extract()
+            item['tags'] = apartment.css(pp.css_apartment_info).extract()
+            yield item
 
             # append link
             apartment_info = apartment.css(pp.css_apartment_info)
@@ -436,16 +483,16 @@ class Splasher_spider(scrapy.Spider):
                     df_indiv_saved2["version"]
                     df_indiv_saved2 = df_indiv_saved2[~df_indiv_saved2.index.duplicated(keep='last')]
                     if code not in df_indiv_saved2.index:
-                        debug_print(f"Don't have enriching for this id yet: {code} (page {page_number + 1}), {borough_name}")
+                        debug_print(f"Don't have enriching for this id yet: {code} (page {page_number + 1}), {borough_name} {valid_price}")
                         yield from self.splash_pages(indiv_apartment_link, response)
-                    elif (not acceptable.__contains__(df_indiv_saved2.loc[code]["version"])):
-                        debug_print(f"Enriching version is too old for this id: {code} (page {page_number + 1}), {borough_name}")
+                    elif (not vv.VERSION_ACCEPTABLE.__contains__(df_indiv_saved2.loc[code]["version"])):
+                        debug_print(f"Enriching version is too old for this id: {code} (page {page_number + 1}), {borough_name} {valid_price}")
                         yield from self.splash_pages(indiv_apartment_link, response)
                     else:
-                        debug_print(f"already have this id: {code} (page {page_number + 1}), {borough_name}")
+                        debug_print(f"already have this id: {code} (page {page_number + 1}), {borough_name} {valid_price}")
                 except:
                     print(
-                        f"enriched df doesn't exist, or don't have individual listings yet for:{code} (page {page_number + 1}), {borough_name}")
+                        f"enriched df doesn't exist, or don't have individual listings yet for:{code} (page {page_number + 1}),{borough_name} {valid_price}")
                     yield from self.splash_pages(indiv_apartment_link, response)
 
         data = {
@@ -533,28 +580,32 @@ class Splasher_spider(scrapy.Spider):
         print(f"SCRAPED LISTINGS: {SCRAPED_LISTINGS} (SCRAPED ITEMS: {SCRAPED_ITEMS}) <-- {response.url}")
 
         if SCRAPED_LISTINGS > vv.MAX_LISTINGS:
-            print(f"3 exceeded max listings scrape: ({SCRAPED_LISTINGS} > {vv.MAX_LISTINGS})")
+            print(f"7 exceeded max listings scrape: ({SCRAPED_LISTINGS} > {vv.MAX_LISTINGS})")
             return
+        if SCRAPED_ITEMS > MAX_ITEMS:
+            print(f"7 B exceeded max scrape: ({SCRAPED_ITEMS} > {MAX_ITEMS})")
+            return
+
 
         if DO_ITEMS:
             for code in all_codes:
                 if SCRAPED_LISTINGS > vv.MAX_LISTINGS:
-                    print(f"5 exceeded max listings scrape: ({SCRAPED_LISTINGS} > {vv.MAX_LISTINGS}) {borough_name}")
+                    print(f"8 exceeded max listings scrape: ({SCRAPED_LISTINGS} > {vv.MAX_LISTINGS}) {borough_name}")
                     return
                 try:
                     df_indiv_saved2["version"]
                     df_indiv_saved2 = df_indiv_saved2[~df_indiv_saved2.index.duplicated(keep='last')]
                     if code not in df_indiv_saved2.index:
-                        debug_print(f"Don't have enriching for this id yet: {code} (page {page_number + 1}), {borough_name}")
+                        debug_print(f"Don't have enriching for this id yet: {code} (page {page_number + 1}),{borough_name} {valid_price}")
                         yield from self.splash_pages(indiv_apartment_link, response)
-                    elif (not acceptable.__contains__(df_indiv_saved2.loc[code]["version"])):
-                        debug_print(f"Enriching version is too old for this id: {code} (page {page_number + 1}), {borough_name}")
+                    elif (not vv.VERSION_ACCEPTABLE.__contains__(df_indiv_saved2.loc[code]["version"])):
+                        debug_print(f"Enriching version is too old for this id: {code} (page {page_number + 1}),{borough_name} {valid_price}")
                         yield from self.splash_pages(indiv_apartment_link, response)
                     else:
-                        debug_print(f"already have this id: {code} (page {page_number + 1}), {borough_name}")
+                        debug_print(f"already have this id: {code} (page {page_number + 1}), {borough_name} {valid_price}")
                 except:
                     print(
-                        f"enriched df doesn't exist, or don't have individual listings yet for:{code} (page {page_number + 1}), {borough_name}")
+                        f"enriched df doesn't exist, or don't have individual listings yet for:{code} (page {page_number + 1}),{borough_name} {valid_price}")
                     yield from self.splash_pages(indiv_apartment_link, response)
 
     def write_json_pretty(self, convert_file, df_audit):
@@ -611,7 +662,7 @@ class Splasher_spider(scrapy.Spider):
                 pass
 
         if SCRAPED_ITEMS > MAX_ITEMS:
-            print(f"7 exceeded max scrape: ({SCRAPED_ITEMS} > {MAX_ITEMS})")
+            print(f"9 exceeded max scrape: ({SCRAPED_ITEMS} > {MAX_ITEMS})")
             return
 
         self.process_page(response)
@@ -901,6 +952,7 @@ class Splasher_spider(scrapy.Spider):
             # df_original['bedrooms'] = df_original['Address'].str.extract('(bedroom)')
             # check if the csv file has been corrupted by <br> or other
             try:
+
                 test = pd.read_csv(vv.LISTING_JSON_MODEL_FILE)
                 test['id'].astype('int')
                 header_on_json = False
@@ -958,11 +1010,15 @@ class Splasher_spider(scrapy.Spider):
                             short_lowbound=2, short_highbound=7,
                             long_lowbound=15, long_highbound=70, source="--"):
 
+        global multiplier
+
+        if multiplier == 0:
+            #print('N.B. sleep is disabled')
+            return 0
+
         if NOTHING_YIELDED:
             sleep_time = random.randint(-1, 2)
         else:
-
-            global multiplier
 
             long_sleep_rand = random.randint(0, long_sleep_chance)
             long_sleep_time = random.randint(long_lowbound, long_highbound)
@@ -972,7 +1028,7 @@ class Splasher_spider(scrapy.Spider):
                 sleep_time = long_sleep_time
             else:
                 sleep_time = short_sleep_time
-                print(f"sleep: {sleep_time} [from {source}]")
+                print(f"sleep: {sleep_time} [from {source}] [multiplier is {multiplier} so actual sleep time is {sleep_time * multiplier}]")
             sleep_time = sleep_time * multiplier
 
         if sleep_time < 0: sleep_time = 0
@@ -993,14 +1049,15 @@ dc_dict = dict()
 
 # Run the Spider
 process = CrawlerProcess()
+
 x = process.crawl(Splasher_spider)
 y = process.start()
 stations = []
 all_codes2 = []
 date_scraped = []
 
-pp.publish_dataframe(vv.LISTING_BASIC_FILE, ['Links', 'Address', 'version'], new_location=vv.LISTING_BASIC_PUBLICATION)
-pp.publish_dataframe(vv.LISTING_ENRICHED_FILE, ['link', 'version'], drop_duplicates=True, new_location=vv.LISTING_ENRICHED_PUBLICATION)
+# pp.publish_dataframe(vv.LISTING_BASIC_FILE, droppable_basic, new_location=vv.LISTING_BASIC_PUBLICATION)
+# pp.publish_dataframe(vv.LISTING_ENRICHED_FILE, droppable_enriched, drop_duplicates=True, new_location=vv.LISTING_ENRICHED_PUBLICATION)
 
 print('reached the genuine end')
 # quit()

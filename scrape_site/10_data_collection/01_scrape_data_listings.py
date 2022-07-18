@@ -14,10 +14,12 @@ import globalfunction.pp as pp  # importing
 
 import html2text
 
+target_concurrency = 12
+target_concurrency = 1
+
 # PAGES_PER_BOROUGH = 3
 # PAGES_PER_BOROUGH = 7
-PAGES_PER_BOROUGH = 12
-#PAGES_PER_BOROUGH = 3
+PAGES_PER_BOROUGH = 30
 
 DEBUG_ON = True
 
@@ -26,8 +28,9 @@ SCRAPED_LISTINGS = -1
 SCRAPED_ITEMS = -1
 global_min_price = "100000"
 multiplier = 0.5
-#multiplier = 1
 # multiplier = 2
+multiplier = 0.1
+multiplier = 0
 
 NOTHING_YIELDED = True
 
@@ -35,7 +38,7 @@ header_on_meta, header_on_json, first_call = True, True, True
 DO_PICKUPS = False  # True
 ONLY_PICKUPS = False
 DO_LISTINGS = True
-DO_ITEMS = True
+DO_ITEMS = True  # False
 PICKUP_FROM_TAIL = False
 
 if DO_PICKUPS:
@@ -48,20 +51,34 @@ borough_retrieved_no_data = {}
 print_headers = True
 
 
+class QuoteItem(scrapy.Item):
+    text = scrapy.Field()
+    author = scrapy.Field()
+    tags = scrapy.Field()
+
+
 # Create the Spider class
 class Splasher_spider(scrapy.Spider):
     name = "splasher_spider"
+
+    custom_settings = {
+        # 'SOME_SETTING': 'some value',
+        # 'AUTOTHROTTLE_TARGET_CONCURRENCY': 1.5
+        'AUTOTHROTTLE_TARGET_CONCURRENCY': target_concurrency
+    }
+
+    print('default settings updated')
 
     # start_requests method
     def start_requests(self):
 
         global borough_retrieved_no_data, header_on_meta, header_on_json, SCRAPED_LISTINGS
 
-        print(pd.DataFrame({k: sys.getsizeof(v) for (k, v) in locals().items()}, index=['Size']).T.sort_values(by='Size', ascending=False).head(4))
-        print(gc.get_threshold())
-        print(gc.get_count())
+        # print(pd.DataFrame({k: sys.getsizeof(v) for (k, v) in locals().items()}, index=['Size']).T.sort_values(by='Size', ascending=False).head(4))
+        # print(gc.get_threshold())
+        # print(gc.get_count())
         gc.collect()
-        print(gc.get_count())
+        # print(gc.get_count())
 
         try:
             pd.read_csv(vv.LISTING_JSON_MODEL_FILE)
@@ -141,16 +158,17 @@ class Splasher_spider(scrapy.Spider):
                     print(f"Considering borough:{borough_name}, page:{page_number + 1}, price:{q_minPrice}")
                     if borough_retrieved_no_data[borough_name] > 2:
                         print(f"retrieved too many no_datas for {borough_name}, cutting out early")
-                        continue
+                        #continue
+                        break
 
                     if q_minPrice_unrounded > vv.MAX_PRICE:
                         print(f"recorded price {q_minPrice_unrounded} exceeds max price {vv.MAX_PRICE}, cutting out early")
-                        continue
+                        #continue
+                        break
 
                     if SCRAPED_LISTINGS > vv.MAX_LISTINGS:
                         print(f"0 exceeded max scrape: ({SCRAPED_LISTINGS} > {vv.MAX_LISTINGS})")
                         return
-
 
                     index = 24 * page_number
 
@@ -373,8 +391,16 @@ class Splasher_spider(scrapy.Spider):
 
         apartments = response.css(pp.css_apartments)
 
+        # for quote in response.css('div.quote'):
         for apartment in apartments:
             # course_links = course_blocks.xpath('./a/@href')
+
+            item = QuoteItem()
+            # item['text'] = quote.css('span.text::text').extract_first()
+            # item['author'] = quote.css('small.author::text').extract_first()
+            # item['tags'] = quote.css('div.tags a.tag::text').extract()
+            item['tags'] = apartment.css(pp.css_apartment_info).extract()
+            yield item
 
             # append link
             apartment_info = apartment.css(pp.css_apartment_info)
@@ -558,7 +584,6 @@ class Splasher_spider(scrapy.Spider):
         if SCRAPED_ITEMS > MAX_ITEMS:
             print(f"7 B exceeded max scrape: ({SCRAPED_ITEMS} > {MAX_ITEMS})")
             return
-
 
         if DO_ITEMS:
             for code in all_codes:
@@ -983,11 +1008,15 @@ class Splasher_spider(scrapy.Spider):
                             short_lowbound=2, short_highbound=7,
                             long_lowbound=15, long_highbound=70, source="--"):
 
+        global multiplier
+
+        if multiplier == 0:
+            # print('N.B. sleep is disabled')
+            return 0
+
         if NOTHING_YIELDED:
             sleep_time = random.randint(-1, 2)
         else:
-
-            global multiplier
 
             long_sleep_rand = random.randint(0, long_sleep_chance)
             long_sleep_time = random.randint(long_lowbound, long_highbound)
@@ -997,7 +1026,7 @@ class Splasher_spider(scrapy.Spider):
                 sleep_time = long_sleep_time
             else:
                 sleep_time = short_sleep_time
-                print(f"sleep: {sleep_time} [from {source}]")
+                print(f"sleep: {sleep_time} [from {source}] [multiplier is {multiplier} so actual sleep time is {sleep_time * multiplier}]")
             sleep_time = sleep_time * multiplier
 
         if sleep_time < 0: sleep_time = 0
@@ -1018,14 +1047,13 @@ dc_dict = dict()
 
 # Run the Spider
 process = CrawlerProcess()
+
 x = process.crawl(Splasher_spider)
 y = process.start()
 stations = []
 all_codes2 = []
 date_scraped = []
 
-pp.publish_dataframe(vv.LISTING_BASIC_FILE, ['Links', 'Address', 'version'], new_location=vv.LISTING_BASIC_PUBLICATION)
-pp.publish_dataframe(vv.LISTING_ENRICHED_FILE, ['link', 'version'], drop_duplicates=True, new_location=vv.LISTING_ENRICHED_PUBLICATION)
 
 print('reached the genuine end')
 # quit()

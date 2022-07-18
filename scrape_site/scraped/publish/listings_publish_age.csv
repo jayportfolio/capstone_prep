@@ -1,0 +1,119 @@
+postcode,address.outcode,address.incode,soldPropertyType,propertySubType,analyticsProperty.propertyType,analyticsProperty.preOwned,analyticsProperty.added,analyticsProperty.ownership,tenure.tenureType,property_age
+SM4 6AR,SM4,6AR,FLAT,Flat,Flats / Apartments,Resale,20220627.0,Non-shared ownership,SHARE_OF_FREEHOLD,37.0
+SM4 5SH,SM4,5SH,UNKNOWN,Apartment,Flats / Apartments,Resale,20220128.0,Non-shared ownership,LEASEHOLD,37.0
+SE5 9PF,SE5,9PF,UNKNOWN,Ground Flat,Flats / Apartments,Resale,20220420.0,Non-shared ownership,LEASEHOLD,37.0
+SM1 4EL,SM1,4EL,UNKNOWN,Maisonette,Flats / Apartments,Resale,20220606.0,Non-shared ownership,LEASEHOLD,37.0
+TW4 7DJ,TW4,7DJ,UNKNOWN,Apartment,Flats / Apartments,New Home,20220701.0,Shared ownership,LEASEHOLD,10.0
+SE13 5HW,SE13,5HW,FLAT,Flat,Flats / Apartments,Resale,20220708.0,Non-shared ownership,LEASEHOLD,37.0
+E4 9HE,E4,9HE,TERRACED,Terraced,Houses,Resale,20220621.0,Non-shared ownership,FREEHOLD,37.0
+E11 4HA,E11,4HA,FLAT,Flat,Flats / Apartments,Resale,20220625.0,Non-shared ownership,SHARE_OF_FREEHOLD,37.0
+SM6 0PN,SM6,0PN,UNKNOWN,Apartment,Flats / Apartments,Resale,20220628.0,Non-shared ownership,LEASEHOLD,37.0
+RM12 4BT,RM12,4BT,SEMI_DETACHED,Semi-Detached,Houses,Resale,20220416.0,Non-shared ownership,FREEHOLD,37.0
+TW13 4EW,TW13,4EW,UNKNOWN,End of Terrace,Houses,Resale,20220426.0,Non-shared ownership,FREEHOLD,37.0
+SW15 2JH,SW15,2JH,FLAT,Flat,Flats / Apartments,Resale,20220429.0,Non-shared ownership,LEASEHOLD,18.0
+SM3 9SD,SM3,9SD,UNKNOWN,End of Terrace,Houses,Resale,20220503.0,Non-shared ownership,FREEHOLD,37.0
+TW5 9TT,TW5,9TT,UNKNOWN,End of Terrace,Houses,Resale,20220504.0,Non-shared ownership,FREEHOLD,37.0
+E1 3BX,E1,3BX,FLAT,Flat,Flats / Apartments,Resale,20220325.0,Non-shared ownership,SHARE_OF_FREEHOLD,27.0
+E17 8EW,E17,8EW,FLAT,Flat,Flats / Apartments,Resale,20220330.0,Non-shared ownership,LEASEHOLD,37.0
+E14 6UR,E14,6UR,UNKNOWN,Apartment,Flats / Apartments,Resale,20220408.0,Shared ownership,LEASEHOLD,10.0
+RM7 7BJ,RM7,7BJ,SEMI_DETACHED,Semi-Detached,Houses,Resale,20220413.0,Non-shared ownership,FREEHOLD,37.0
+SM3 9RG,SM3,9RG,FLAT,Flat,Flats / Apartments,Resale,20220224.0,Non-shared ownership,LEASEHOLD,37.0
+E14 7AP,E14,7AP,FLAT,Flat,Flats / Apartments,Resale,20220224.0,Non-shared ownership,,37.0
+SW2 1RE,SW2,1RE,FLAT,Flat,Flats / Apartments,Resale,20220319.0,Non-shared ownership,LEASEHOLD,37.0
+SE4 2DX,SE4,2DX,UNKNOWN,Apartment,Flats / Apartments,Resale,20211206.0,Non-shared ownership,LEASEHOLD,37.0
+TW3 3QN,TW3,3QN,SEMI_DETACHED,Semi-Detached,Houses,Resale,20220111.0,Non-shared ownership,FREEHOLD,37.0
+TW14 9SZ,TW14,9SZ,UNKNOWN,End of Terrace,Houses,Resale,20220126.0,Non-shared ownership,FREEHOLD,37.0
+TW3 1AW,TW3,1AW,FLAT,Flat,Flats / Apartments,Resale,20220202.0,Non-shared ownership,LEASEHOLD,5.0
+SW18 1YR,SW18,1YR,FLAT,Flat,Flats / Apartments,New Home,20220204.0,Shared ownership,LEASEHOLD,10.0
+W14 8HB,W14,8HB,FLAT,Flat,Flats / Apartments,Resale,20220208.0,Non-shared ownership,LEASEHOLD,37.0
+E2 8NA,E2,8NA,FLAT,Flat,Flats / Apartments,Resale,20220210.0,Non-shared ownership,LEASEHOLD,37.0
+SW1V 2TH,SW1V,2TH,UNKNOWN,Studio,Flats / Apartments,Resale,20220211.0,Non-shared ownership,LEASEHOLD,37.0
+SM5 2PF,SM5,2PF,UNKNOWN,End of Terrace,Houses,Resale,20211004.0,Non-shared ownership,FREEHOLD,37.0
+E17 6LU,E17,6LU,UNKNOWN,Apartment,Flats / Apartments,Resale,20211006.0,Non-shared ownership,LEASEHOLD,37.0
+W10 5UN,W10,5UN,UNKNOWN,Apartment,Flats / Apartments,Resale,20211018.0,Non-shared ownership,SHARE_OF_FREEHOLD,37.0
+SM1 4FF,SM1,4FF,UNKNOWN,Apartment,Flats / Apartments,Resale,20211029.0,Non-shared ownership,LEASEHOLD,8.0
+SM1 3AH,SM1,3AH,UNKNOWN,Ground Flat,Flats / Apartments,Resale,20211227.0,Non-shared ownership,LEASEHOLD,37.0
+E18 1AN,E18,1AN,FLAT,Flat,Flats / Apartments,Resale,20211229.0,Non-shared ownership,LEASEHOLD,37.0
+SM5 2FH,SM5,2FH,UNKNOWN,Apartment,Flats / Apartments,Resale,20220101.0,Non-shared ownership,LEASEHOLD,10.0
+E9 5HP,E9,5HP,FLAT,Flat,Flats / Apartments,Resale,20220105.0,Non-shared ownership,LEASEHOLD,37.0
+E17 7FT,E17,7FT,UNKNOWN,Studio,Flats / Apartments,New Home,20220614.0,Shared ownership,LEASEHOLD,10.0
+E3 3YX,E3,3YX,UNKNOWN,Apartment,Flats / Apartments,Resale,20220519.0,Shared ownership,LEASEHOLD,10.0
+SM2 5EP,SM2,5EP,UNKNOWN,Penthouse,Flats / Apartments,Resale,20220524.0,Non-shared ownership,LEASEHOLD,37.0
+E1 1LF,E1,1LF,UNKNOWN,Apartment,Flats / Apartments,Resale,20210804.0,Non-shared ownership,LEASEHOLD,22.0
+SW15 4BS,SW15,4BS,FLAT,Flat,Flats / Apartments,Resale,20210827.0,Non-shared ownership,LEASEHOLD,37.0
+SM1 4NZ,SM1,4NZ,FLAT,Flat,Flats / Apartments,Resale,20210907.0,Non-shared ownership,LEASEHOLD,37.0
+KT4 8JF,KT4,8JF,TERRACED,Terraced,Houses,Resale,20210908.0,Non-shared ownership,FREEHOLD,37.0
+E3 3SU,E3,3SU,UNKNOWN,Apartment,Flats / Apartments,Resale,20201028.0,Non-shared ownership,LEASEHOLD,8.0
+SW3 3EQ,SW3,3EQ,FLAT,Flat,Flats / Apartments,Resale,20200320.0,Non-shared ownership,LEASEHOLD,37.0
+E14 9HN,E14,9HN,UNKNOWN,Apartment,Flats / Apartments,Resale,20210401.0,Non-shared ownership,LEASEHOLD,13.0
+W10 5DB,W10,5DB,UNKNOWN,Apartment,Flats / Apartments,Resale,20220222.0,Non-shared ownership,LEASEHOLD,37.0
+E14 9JB,E14,9JB,FLAT,Flat,Flats / Apartments,Resale,20200914.0,Non-shared ownership,LEASEHOLD,15.0
+E3 5LU,E3,5LU,FLAT,Flat,Flats / Apartments,Resale,20220517.0,Non-shared ownership,LEASEHOLD,19.0
+SM6 0PF,SM6,0PF,UNKNOWN,Apartment,Flats / Apartments,Resale,20220517.0,Non-shared ownership,SHARE_OF_FREEHOLD,37.0
+KT1 3DX,KT1,3DX,UNKNOWN,Apartment,Flats / Apartments,Resale,20220517.0,Non-shared ownership,LEASEHOLD,19.0
+CR0 4QQ,CR0,4QQ,UNKNOWN,House,Houses,Resale,20220601.0,Non-shared ownership,FREEHOLD,25.0
+SW15 3BU,SW15,3BU,FLAT,Flat,Flats / Apartments,Resale,20220601.0,Non-shared ownership,LEASEHOLD,37.0
+E4 6XR,E4,6XR,TERRACED,Terraced,Houses,Resale,20220601.0,Non-shared ownership,FREEHOLD,37.0
+SW16 6RY,SW16,6RY,FLAT,Flat,Flats / Apartments,Resale,20220608.0,Non-shared ownership,LEASEHOLD,37.0
+E14 0JG,E14,0JG,FLAT,Flat,Flats / Apartments,New Home,20220609.0,Non-shared ownership,LEASEHOLD,1.0
+W11 1NX,W11,1NX,UNKNOWN,Apartment,Flats / Apartments,Resale,20220610.0,Non-shared ownership,LEASEHOLD,37.0
+TW7 6RL,TW7,6RL,FLAT,Flat,Flats / Apartments,Resale,20220610.0,Non-shared ownership,LEASEHOLD,37.0
+SM5 4LT,SM5,4LT,TERRACED,Terraced,Houses,Resale,20220613.0,Non-shared ownership,FREEHOLD,37.0
+E18 2BU,E18,2BU,FLAT,Flat,Flats / Apartments,Resale,20220630.0,Non-shared ownership,LEASEHOLD,37.0
+IG6 2FA,IG6,2FA,UNKNOWN,Apartment,Flats / Apartments,Resale,20220315.0,Non-shared ownership,LEASEHOLD,5.0
+SW11 1XG,SW11,1XG,FLAT,Flat,Flats / Apartments,Resale,20220518.0,Non-shared ownership,LEASEHOLD,37.0
+SW11 8PL,SW11,8PL,UNKNOWN,Apartment,Flats / Apartments,Resale,20220406.0,Non-shared ownership,LEASEHOLD,37.0
+SW11 3LX,SW11,3LX,FLAT,Flat,Flats / Apartments,Resale,20220405.0,Non-shared ownership,LEASEHOLD,37.0
+SW11 3RU,SW11,3RU,UNKNOWN,Apartment,Flats / Apartments,Resale,20220215.0,Non-shared ownership,LEASEHOLD,37.0
+SW17 8ET,SW17,8ET,UNKNOWN,Apartment,Flats / Apartments,Resale,20220705.0,Non-shared ownership,LEASEHOLD,37.0
+SW18 3DR,SW18,3DR,FLAT,Flat,Flats / Apartments,Resale,20220216.0,Non-shared ownership,SHARE_OF_FREEHOLD,37.0
+IG2 6UT,IG2,6UT,DETACHED,Detached,Houses,Resale,20220512.0,Non-shared ownership,FREEHOLD,37.0
+NW2 2BG,NW2,2BG,UNKNOWN,Apartment,Flats / Apartments,Resale,20220606.0,Non-shared ownership,SHARE_OF_FREEHOLD,12.0
+RM10 7TT,RM10,7TT,TERRACED,Terraced,Houses,Resale,20220405.0,Non-shared ownership,FREEHOLD,37.0
+RM6 5DR,RM6,5DR,SEMI_DETACHED,Semi-Detached,Houses,Resale,20220608.0,Non-shared ownership,FREEHOLD,37.0
+IG1 2QN,IG1,2QN,TERRACED,Terraced,Houses,Resale,20211202.0,Non-shared ownership,FREEHOLD,37.0
+IG3 8AA,IG3,8AA,TERRACED,Terraced,Houses,Resale,20220506.0,Non-shared ownership,,37.0
+W2 3QD,W2,3QD,FLAT,Flat,Flats / Apartments,Resale,20220315.0,Non-shared ownership,LEASEHOLD,37.0
+CR0 3HW,CR0,3HW,UNKNOWN,End of Terrace,Houses,Resale,20220606.0,Non-shared ownership,FREEHOLD,37.0
+SE25 5DS,SE25,5DS,TERRACED,Terraced,Houses,Resale,20220523.0,Non-shared ownership,FREEHOLD,37.0
+CR0 9DU,CR0,9DU,TERRACED,Terraced,Houses,Resale,20211008.0,Non-shared ownership,,37.0
+EN3 6NJ,EN3,6NJ,UNKNOWN,Apartment,Flats / Apartments,New Home,20220424.0,Shared ownership,SHARE_OF_FREEHOLD,37.0
+EN1 1LS,EN1,1LS,TERRACED,Terraced,Houses,Resale,20220228.0,Non-shared ownership,FREEHOLD,37.0
+UB5 6UH,UB5,6UH,TERRACED,Terraced,Houses,Resale,20220503.0,Non-shared ownership,FREEHOLD,37.0
+W7 3UB,W7,3UB,FLAT,Flat,Flats / Apartments,Resale,20211123.0,Non-shared ownership,LEASEHOLD,37.0
+UB5 6GW,UB5,6GW,FLAT,Flat,Flats / Apartments,Resale,20220324.0,Non-shared ownership,FREEHOLD,14.0
+CR2 8QA,CR2,8QA,FLAT,Flat,Flats / Apartments,New Home,20220706.0,Shared ownership,LEASEHOLD,10.0
+CR0 5UX,CR0,5UX,UNKNOWN,Maisonette,Flats / Apartments,Resale,20220629.0,Non-shared ownership,SHARE_OF_FREEHOLD,37.0
+CR0 0DY,CR0,0DY,TERRACED,Terraced,Houses,Resale,20220630.0,Non-shared ownership,FREEHOLD,37.0
+CR0 9JR,CR0,9JR,TERRACED,Terraced,Houses,Resale,20220328.0,Non-shared ownership,FREEHOLD,37.0
+EN4 0LH,EN4,0LH,UNKNOWN,Apartment,Flats / Apartments,Resale,20220201.0,Non-shared ownership,LEASEHOLD,38.0
+EN2 8HS,EN2,8HS,UNKNOWN,End of Terrace,Houses,Resale,20220701.0,Non-shared ownership,FREEHOLD,37.0
+EN1 4PS,EN1,4PS,SEMI_DETACHED,Semi-Detached,Houses,Resale,20220125.0,Non-shared ownership,FREEHOLD,37.0
+W5 3AX,W5,3AX,UNKNOWN,Apartment,Flats / Apartments,Resale,20220510.0,Non-shared ownership,SHARE_OF_FREEHOLD,37.0
+UB6 0AJ,UB6,0AJ,FLAT,Flat,Flats / Apartments,Resale,20220615.0,Non-shared ownership,LEASEHOLD,37.0
+UB2 4AU,UB2,4AU,UNKNOWN,Apartment,Flats / Apartments,New Home,20220610.0,Shared ownership,LEASEHOLD,10.0
+CR0 9LZ,CR0,9LZ,UNKNOWN,Town House,Houses,Resale,20220328.0,Non-shared ownership,FREEHOLD,37.0
+W5 1BF,W5,1BF,UNKNOWN,Apartment,Flats / Apartments,Resale,20220505.0,Non-shared ownership,LEASEHOLD,38.0
+W5 2AF,W5,2AF,UNKNOWN,Apartment,Flats / Apartments,Resale,20220323.0,Non-shared ownership,LEASEHOLD,37.0
+UB6 0SW,UB6,0SW,UNKNOWN,Town House,Houses,Resale,20220314.0,Non-shared ownership,FREEHOLD,37.0
+CR8 2NF,CR8,2NF,UNKNOWN,Apartment,Flats / Apartments,New Home,20220316.0,Shared ownership,LEASEHOLD,10.0
+CR0 2FT,CR0,2FT,UNKNOWN,Apartment,Flats / Apartments,Resale,20200722.0,Non-shared ownership,LEASEHOLD,9.0
+SE9 2BN,SE9,2BN,TERRACED,Terraced,Houses,Resale,20220112.0,Non-shared ownership,FREEHOLD,37.0
+SE9 6AB,SE9,6AB,UNKNOWN,Not Specified,Not Specified,Resale,20220413.0,Non-shared ownership,FREEHOLD,38.0
+CR2 8RD,CR2,8RD,FLAT,Flat,Flats / Apartments,Resale,20220623.0,Non-shared ownership,LEASEHOLD,37.0
+SE19 3ED,SE19,3ED,TERRACED,Terraced,Houses,Resale,20220607.0,Non-shared ownership,FREEHOLD,37.0
+SE10 0NN,SE10,0NN,FLAT,Flat,Flats / Apartments,Resale,20211112.0,Non-shared ownership,LEASEHOLD,8.0
+UB10 8AX,UB10,8AX,UNKNOWN,Apartment,Flats / Apartments,Resale,20220707.0,Non-shared ownership,LEASEHOLD,7.0
+CR8 5BZ,CR8,5BZ,UNKNOWN,Bungalow,Bungalows,Resale,20220303.0,Non-shared ownership,FREEHOLD,38.0
+SE3 7LS,SE3,7LS,FLAT,Flat,Flats / Apartments,Resale,20220629.0,Non-shared ownership,SHARE_OF_FREEHOLD,37.0
+CR5 1JL,CR5,1JL,SEMI_DETACHED,Semi-Detached,Houses,Resale,20220321.0,Non-shared ownership,FREEHOLD,37.0
+W3 9BX,W3,9BX,FLAT,Flat,Flats / Apartments,Resale,20220401.0,Non-shared ownership,LEASEHOLD,37.0
+KT5 8JF,KT5,8JF,UNKNOWN,Apartment,Flats / Apartments,Resale,20220414.0,Non-shared ownership,SHARE_OF_FREEHOLD,37.0
+CR8 2EL,CR8,2EL,SEMI_DETACHED,Semi-Detached,Houses,Resale,20211210.0,Non-shared ownership,FREEHOLD,37.0
+CR5 3LW,CR5,3LW,FLAT,Flat,Flats / Apartments,New Home,20220118.0,Shared ownership,LEASEHOLD,10.0
+CR0 1SQ,CR0,1SQ,FLAT,Flat,Flats / Apartments,New Home,20220628.0,Non-shared ownership,LEASEHOLD,37.0
+KT3 3BJ,KT3,3BJ,UNKNOWN,Maisonette,Flats / Apartments,Resale,20220616.0,Non-shared ownership,LEASEHOLD,37.0
+SE15 1HG,SE15,1HG,UNKNOWN,Apartment,Flats / Apartments,Resale,20220624.0,Non-shared ownership,FREEHOLD,37.0
+SW9 0NB,SW9,0NB,UNKNOWN,Apartment,Flats / Apartments,Resale,20211029.0,Non-shared ownership,LEASEHOLD,18.0
+SE27 9SE,SE27,9SE,UNKNOWN,Apartment,Flats / Apartments,Resale,20210413.0,Non-shared ownership,LEASEHOLD,37.0
+SE27 0BJ,SE27,0BJ,UNKNOWN,Apartment,Flats / Apartments,Resale,20220504.0,Non-shared ownership,,37.0
