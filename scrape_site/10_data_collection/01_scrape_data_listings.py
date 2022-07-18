@@ -608,8 +608,8 @@ class Splasher_spider(scrapy.Spider):
 
     def write_json_pretty(self, convert_file, df_audit):
         # convert_file.write(json.dumps(df_audit))
-        # convert_file.write(json.dumps(df_audit, indent=4, sort_keys=True))
-        convert_file.write(json.dumps(df_audit, indent=4))
+        convert_file.write(json.dumps(df_audit, indent=4, sort_keys=True))
+        # convert_file.write(json.dumps(df_audit, indent=4))
 
     def splash_pages(self, indiv_apartment_link, response):
         if print_headers: print("SPLASH_PAGES")
