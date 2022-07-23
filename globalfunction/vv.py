@@ -1,5 +1,6 @@
 import pandas as pd
 import sys
+import os
 
 sys.path.append('../../globalfunction')  # setting path
 import globalfunction.pp as pp  # importing
@@ -56,7 +57,14 @@ MODEL2 = "window.jsonModel"
 
 
 # numeric_values_only=True ==> False
-def dataset_modelling_version(iteration_code, early_duplicates=True, HOW='left', feature_columns=None, show_not_used=False, row_limit=None):
+def cached_data(iteration_code):
+    project_root = os.path.dirname(os.path.dirname(__file__))
+    output_path = os.path.join(project_root, 'scrape_site/datasets/data/')
+    df = pd.read_csv(f"{output_path}data__{iteration_code}.csv")
+    return df
+
+
+def dataset_modelling_version(iteration_code, early_duplicates=True, HOW='left', feature_columns=None, show_not_used=False, row_limit=None,verbose=False,GET_CACHED = False):
     # print(pd.options.display.max_rows)  # 60
     orig_max_rows = pd.options.display.max_rows
     pd.options.display.max_rows = 4000
@@ -64,7 +72,7 @@ def dataset_modelling_version(iteration_code, early_duplicates=True, HOW='left',
 
     df_original = get_combined_dataset(HOW, early_duplicates, row_limit=row_limit)
 
-    print("type", type(df_original.columns))
+    #print("type", type(df_original.columns))
     droppable_columns = []
 
     if iteration_code < "0010":
@@ -79,35 +87,31 @@ def dataset_modelling_version(iteration_code, early_duplicates=True, HOW='left',
                 return df_original
             # return df_original
             else:
-                print(df_original.columns)
+                #print(df_original.columns)
+                print("!!!")
+                return
 
         elif iteration_code == "0001_20220620":  # The numeric data
-            df = df_original[['bedrooms', 'bathrooms', 'Price']]
-            print(df.columns)
-            return df
+            df = df_original[['bedrooms_model', 'bathrooms_model', 'Price']]
+            if verbose:
+                print(df.columns)
+            return df, "basic model: bedrooms and bathrooms", ['bedrooms_model', 'bathrooms_model'], []
 
     else:
-
-        df_original['Price'] = pd.to_numeric(df_original['Price'], 'coerce').dropna().astype(int)
-        df_original = df_original.rename(index=str, columns={"Station_Prox": "distance_to_any_train"})
-        df_original['floorplan_count'] = df_original['floorplans'].apply(get_array_length)
-        df_original['borough_name'] = df_original["borough"].str.extract("\('(.+)',")
-        df_original['coarse_compass_direction'] = df_original["address.outcode"].str.extract("([a-zA-Z]+)")
-        # df_original['type'] = df_original[\"Description\"].str.extract(\"(house|apartment|flat|maisonette)\")
-        df_original['sq_ft'] = df_original["size"].str.extract("(\d*) sq. ft.")
-        # df_original['hold_type2'] = df_original[\"hold_type\"].str.replace(\"Tenure:\",\"\").str.strip()
-
-        df_original = combined_remove_outliers(df_original)
+        df_original = pre_tidy_dataset(df_original)
 
         if iteration_code < "0020":
 
             if iteration_code == "0010_00000000":
-                pass
+                df = df_original
             elif iteration_code == "0011_20220703":  # The numeric data
                 # for each, i in zip(df_original.columns, range(len(df_original.columns))):
                 # if df_original[each].dtype in [int, float]:print("numeric: ", each)
                 # else:print("other: ", each, df_original[each].dtype);droppable_columns.append(each)
                 df = df_original[pp.useful_numeric.keys()]
+                description = "small series of numeric keys"
+                numeric_keys = pp.useful_numeric.keys()
+                cat_keys = []
 
             elif iteration_code == "0012_20220704":
                 iteration_keys = list(pp.useful_numeric.keys())
@@ -117,6 +121,9 @@ def dataset_modelling_version(iteration_code, early_duplicates=True, HOW='left',
                 for column in ['borough_name']:
                     df = pd.concat([df, pd.get_dummies(df[column], prefix=column)], axis=1)
                     df.drop([column], axis=1, inplace=True)  # now drop the original column (you don't need it anymore),
+
+                numeric_keys = pp.useful_numeric.keys()
+                cat_keys = ["borough_name"]
 
             elif iteration_code == "0013_20220704":
                 iteration_keys = list(pp.useful_numeric.keys())
@@ -134,6 +141,9 @@ def dataset_modelling_version(iteration_code, early_duplicates=True, HOW='left',
                 # for column in cat_keys:
                 #    df = pd.concat([df, pd.get_dummies(df[column], prefix=column)], axis=1)
                 #    df.drop([column], axis=1, inplace=True)  # now drop the original column (you don't need it anymore),
+
+                numeric_keys = pp.useful_numeric.keys()
+
             else:
                 raise LookupError(iteration_code + " is not a valid iteration code (1)")
         elif iteration_code < "0050":
@@ -165,10 +175,12 @@ def dataset_modelling_version(iteration_code, early_duplicates=True, HOW='left',
                 for each in df_words:
                     # k += 1
                     # if k > 2: break
-                    print(each)
+                    if verbose:
+                        print(each)
                     label = 'content__' + each.replace(" ", "_")
                     df[label] = df["content"].str.contains(each)
-                print(df.columns)
+                if verbose:
+                    print(df.columns)
                 df.drop(text_columns, axis=1, inplace=True)  # now drop the original column (you don't need it anymore),
                 df.drop(['content'], axis=1, inplace=True)  # now drop the original column (you don't need it anymore),
             elif iteration_code in ("0042_20220710"):
@@ -184,7 +196,8 @@ def dataset_modelling_version(iteration_code, early_duplicates=True, HOW='left',
                     df = pd.concat([df, pd.get_dummies(df[column], prefix=column)], axis=1)
                     df.drop([column], axis=1, inplace=True)  # now drop the original column (you don't need it anymore),
 
-                print(df.columns)
+                if verbose:
+                    print(df.columns)
         elif iteration_code < "0060":
             if iteration_code == ("0051_20220716"):
                 iteration_keys = list(pp.useful_numeric.keys())
@@ -214,7 +227,8 @@ def dataset_modelling_version(iteration_code, early_duplicates=True, HOW='left',
 
                 df = df_original[iteration_keys]
 
-                print(len(df))
+                if verbose:
+                    print(len(df))
                 # df[df['ids'].str.contains("ball")]
 
                 for each in ["text.description", "analyticsProperty.priceQualifier", "keyFeatures"]:
@@ -223,7 +237,8 @@ def dataset_modelling_version(iteration_code, early_duplicates=True, HOW='left',
                         df = df[~df[each].str.lower().str.contains(shared_indicator, na=False)]
                     if not each == "analyticsProperty.priceQualifier":
                         df.drop([each], axis=1, inplace=True)  # now drop the original column (you don't need it anymore),
-                    print(len(df))
+                    if verbose:
+                        print(len(df))
 
             else:
                 raise ValueError(f"{iteration_code} doesn't seem to be set up (< 0060)")
@@ -238,22 +253,17 @@ def dataset_modelling_version(iteration_code, early_duplicates=True, HOW='left',
             for each in df_original.columns:
                 if each not in df.columns:
                     array.append(each)
-            print("not used:", ','.join(array))
+            if verbose:
+                print("not used:", ','.join(array))
 
-        if iteration_code < "0050":
+        if iteration_code < "0050" and False:
+        #if iteration_code in (['0010_00000000','0011_20220703']):
             return df
         else:
             return df, description, numeric_keys, cat_keys
 
     pd.options.display.max_rows = orig_max_rows
 
-
-def combined_remove_outliers(df_original):
-    df_original = df_original[df_original["Price"] <= 600000]
-    df_original = df_original[df_original["distance_to_any_train"] < 8]
-    df_original = df_original[df_original["bathrooms"] < 8]
-    df_original = df_original[df_original["floorplan_count"] < 18]
-    return df_original
 
 
 def quick_data(separate_Xy=False, numeric_values_only=False, nans_forbidden=True, exceptional_nans=[], no_cuts=False,
@@ -373,7 +383,73 @@ def quick_data(separate_Xy=False, numeric_values_only=False, nans_forbidden=True
         return df_original
 
 
+def pre_tidy_dataset(property_dataset):
+
+    property_dataset['Price'] = pd.to_numeric(property_dataset['Price'], 'coerce').dropna().astype(int)
+
+    # do any necessary renames, and some preliminary feature engineering
+    try:
+        property_dataset = property_dataset.rename(index=str, columns={"Station_Prox": "distance_to_any_train"})
+    except:
+        pass
+
+    try:
+        property_dataset['floorplan_count'] = property_dataset['floorplans'].apply(get_array_length)
+    except:
+        pass
+
+    try:
+        property_dataset['borough_name'] = property_dataset["borough"].str.extract("\('(.+)',")
+    except:
+        pass
+
+    try:
+        property_dataset['coarse_compass_direction'] = property_dataset["address.outcode"].str.extract("([a-zA-Z]+)")
+    except:
+        pass
+
+    try:
+        property_dataset['sq_ft'] = property_dataset["size"].str.extract("(\d*) sq. ft.")
+    except:
+        pass
+
+    # try:
+    # except:
+    #     pass
+
+    # property_dataset['type'] = property_dataset[\"Description\"].str.extract(\"(house|apartment|flat|maisonette)\")
+    # property_dataset['hold_type2'] = property_dataset[\"hold_type\"].str.replace(\"Tenure:\",\"\").str.strip()
+
+    return property_dataset
+
+def write_export(property_dataset, version_number):
+    project_root = os.path.dirname(os.path.dirname(__file__))
+    output_path = os.path.join(project_root, 'scrape_site/datasets/data/')
+
+    print("Hello again!")
+    property_dataset = property_dataset.reset_index().drop('ids',axis=1)
+    if len(property_dataset) > 5000:
+        print("Sampling because dataset exceeds max")
+        property_dataset = property_dataset.sample(n=5000)
+    property_dataset.to_csv(f"{output_path}data__{version_number}.csv", index=False)
+
 def tidy_dataset(property_dataset, coerce_to_int=None, coerce_to_float=None, na_infer_median=None, na_drop_column=None, na_drop_rows=None):
+
+    #remove_outliers
+    try:
+        property_dataset = property_dataset[property_dataset["distance_to_any_train"] < 8]
+    except:
+        pass
+    try:
+        property_dataset = property_dataset[property_dataset["bathrooms"] < 8]
+    except:
+        pass
+    try:
+        property_dataset = property_dataset[property_dataset["floorplan_count"] < 18]
+    except:
+        pass
+
+    # select the price range to consider
     property_dataset = property_dataset[property_dataset['Price'] >= 100000]
     property_dataset = property_dataset[property_dataset['Price'] <= 600000]
 
@@ -432,7 +508,7 @@ def prettify_dataset(df_original):
     return df_original
 
 
-def get_combined_dataset(HOW, early_duplicates, row_limit=None):
+def get_combined_dataset(HOW, early_duplicates, row_limit=None,verbose=False):
     df_list = pd.read_csv(LISTING_BASIC_FILE)
     df_indiv = pd.read_csv(LISTING_ENRICHED_FILE)
     df_meta = pd.read_csv(LISTING_JSON_META_FILE)
@@ -471,7 +547,8 @@ def get_combined_dataset(HOW, early_duplicates, row_limit=None):
         df_age = df_age[~df_age.index.duplicated(keep='last')]
         after_arr.append(len(df_age))
 
-        print(f"remove duplicates: {'/'.join([str(x) for x in before_arr])} ==> {'/'.join([str(x) for x in after_arr])}")
+        if verbose:
+            print(f"remove duplicates: {'/'.join([str(x) for x in before_arr])} ==> {'/'.join([str(x) for x in after_arr])}")
 
     if HOW == 'no_indexes':
         df_original = df_list \

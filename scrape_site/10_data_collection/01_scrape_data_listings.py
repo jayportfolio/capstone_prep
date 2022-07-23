@@ -19,14 +19,16 @@ target_concurrency = 1
 
 # PAGES_PER_BOROUGH = 3
 # PAGES_PER_BOROUGH = 7
-PAGES_PER_BOROUGH = 30
+#PAGES_PER_BOROUGH = 30
+PAGES_PER_BOROUGH = 3
 
 DEBUG_ON = True
 
 # MAX_ITEMS = MAX_LISTINGS * 25 * 2
 SCRAPED_LISTINGS = -1
 SCRAPED_ITEMS = -1
-global_min_price = "100000"
+#global_min_price = "100000"
+global_min_price = 100000
 multiplier = 0.5
 # multiplier = 2
 multiplier = 0.1
@@ -161,7 +163,8 @@ class Splasher_spider(scrapy.Spider):
                         #continue
                         break
 
-                    if q_minPrice_unrounded > vv.MAX_PRICE:
+                    #if q_minPrice_unrounded > vv.MAX_PRICE:
+                    if q_minPrice > vv.MAX_PRICE:
                         print(f"recorded price {q_minPrice_unrounded} exceeds max price {vv.MAX_PRICE}, cutting out early")
                         #continue
                         break
